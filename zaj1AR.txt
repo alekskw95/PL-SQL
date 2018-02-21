@@ -1,0 +1,36 @@
+Zad1
+wyswietlic wydzialy z najwieksza aktualnie liczba zatrudnionych na nim osob
+
+create view wydz_max_osob as 
+select initcap(w.nazwa) wydzial, count(z.id_os) liczba_osob 
+from wydzialy w 
+join zatrudnienia z on w.ID_W=z.ID_W
+where z.do is null
+group by initcap(nazwa)
+order by 2 desc;
+
+
+select wydzial, liczba_osob from wydz_max_osob
+where liczba_osob in (select max(liczba_osob) from wydz_max_osob);
+
+zadanie 2
+
+Dla kazdej p³ci wyœwietliæ osoby o najd³uzszym imieniu
+
+
+select o.plec, length(imie1), initcap(imie1)||' '||initcap(nazwisko) as osoba
+FROM OSOBY O 
+WHERE  length(o.imie1) = (SELECT MAX(length(imie1)) FROM osoby o1 where o.plec=o1.plec )
+;
+
+zadanie 3 
+wyswietlic te stanowiska ktore aktualnie zatrudniaja wiecej niz jedna osobe o imieniu zawierajacym litere a
+
+select s.nazwa, count(z.id_os) liczba_os from 
+stanowiska s join zatrudnienia z on s.id_s=z.id_s
+join osoby o on z.id_os=o.id_os
+where lower(o.imie1) like '%a%'
+and z.do is null
+group by s.nazwa
+having count(z.id_os)>1
+order by 2 DESC;
