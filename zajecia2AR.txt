@@ -1,0 +1,94 @@
+Zad 1 
+Dla poszczególnych wydzia³ów wyœwietliæ œredni¹ z aktualnie pobieranych pensji przy czym nie wyœwietlac wydzia³ów, 
+na których œrednia ta jest najwiêksza. 
+
+with srednia_wydzialu as (
+select w.nazwa as nazwa, avg(pensja) as srednia  from wydzialy w 
+join zatrudnienia z on w.ID_W=z.ID_W
+where z.do is null
+group by w.nazwa)
+select initcap(sw.nazwa) as nazwa, round(sw.srednia,2) as srednia from srednia_wydzialu sw
+where srednia <> (select max(srednia) from srednia_wydzialu)
+order by sw.nazwa; 
+
+II opcja
+
+with srednia_wydzialu as (
+select w.nazwa as nazwa, avg(pensja) as srednia  from wydzialy w 
+join zatrudnienia z on w.ID_W=z.ID_W
+where z.do is null
+group by w.nazwa)
+select initcap(sw.nazwa) as nazwa, round(sw.srednia,2) as srednia from srednia_wydzialu sw
+minus
+select initcap(sw.nazwa) as nazwa, round(sw.srednia,2) as srednia from srednia_wydzialu sw
+where srednia = (select max(srednia) from srednia_wydzialu)
+order by srednia desc;
+
+
+Zadanie 2
+Dla poszczególnych wydzia³ów wyœwietliæ œredni¹ z aktualnie pobieranych pensji przy czym nie wyœwietlac wydzia³ów, 
+na których s¹ dwie najwiêksze œrednie
+
+Mój sposób 
+
+with srednia_wydzialu as (
+select w.nazwa as nazwa, avg(pensja) as srednia  from wydzialy w 
+join zatrudnienia z on w.ID_W=z.ID_W
+where z.do is null
+group by w.nazwa
+order by 2 desc)
+select initcap(sw.nazwa),round(a.srednia,2) from 
+(select  b.srednia, rownum as ile from (select distinct srednia 
+from srednia_wydzialu
+order by srednia desc) b) a join srednia_wydzialu sw on sw.srednia=a.srednia
+where a.ile not in (1,2)
+order by 2 desc;
+
+
+I sposob 
+
+with srednia_wydzialu as (
+select w.nazwa as nazwa, avg(pensja) as srednia  from wydzialy w 
+join zatrudnienia z on w.ID_W=z.ID_W
+where z.do is null
+group by w.nazwa
+order by 2 desc)
+select initcap(sw.nazwa) as nazwa, round(sw.srednia,2) as srednia from srednia_wydzialu sw
+where srednia < (select max(srednia) 
+                   from srednia_wydzialu
+                   where srednia < (select max(srednia) from srednia_wydzialu))
+order by sw.nazwa; 
+
+II sposob
+
+
+
+-- uzupelnic 
+
+
+Zadanie 3
+
+wyswietlic kod bloku anonimowego w jezyku PLSQL 
+za pomoca ktorego z tabeli osoby bedzie mozna wyswietlic dane osoby o danym nazwisku i imieniu 
+np Lis, Jan. które zostan¹ podane poprzez zainicjowane odpowiednicg zmiennych PLSQL 
+w sekcji deklaracji bloku
+
+DECLARE 
+z_imie1 VARCHAR2(15):='Jan';
+z_nazwisko VARCHAR2(15):='Lis';
+z_id number(4,0);
+z_imie2 VARCHAR2(15);
+z_date DATE;
+z_plec CHAR(1);
+BEGIN 
+SELECT id_os, imie2,d_ur,plec 
+into z_id, z_imie2,z_date, z_plec
+FROM osoby 
+WHERE initcap(imie1)=z_imie1 
+AND initcap(nazwisko)=z_nazwisko;
+DBMS_OUTPUT.PUT_LINE(z_id||' '||initcap(z_imie1)||' '||z_imie2||' '||initcap(z_nazwisko)||' '||to_char(z_date)||' '||z_plec);
+END;
+/
+
+
+typ rekordowy, blok z trudnym sql 
