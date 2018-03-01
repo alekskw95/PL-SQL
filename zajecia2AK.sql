@@ -17,26 +17,34 @@ where pensja < (select MAX(pensja)
 from WydzialPensja);
 
 II opcja:
-with sredniawydzialu as(
-select w.nazwa, avg(pensja) as srednia
-from wydzialy w join zatrudnienia z on w.id_w=z.id_w
+with srednia_wydzialu as (
+select w.nazwa as nazwa, avg(pensja) as srednia  from wydzialy w 
+join zatrudnienia z on w.ID_W=z.ID_W
 where z.do is null
 group by w.nazwa)
-
-select INITCAP(wydzial), pensja 
-from sredniawydzialu
-where srednia <> (select MAX(srednia)
-from sredniawydzialu);
+select initcap(sw.nazwa) as nazwa, round(sw.srednia,2) as srednia from srednia_wydzialu sw
+where srednia <> (select max(srednia) from srednia_wydzialu)
+order by sw.nazwa; 
 
 III opcja:
-SELECT nazwa, srednia
-FROM sredniawydzialu
-ORDER BY 2 DESC
+SELECT wydzial, pensja
+FROM wydzialpensja
 MINUS
-SELECT nazwa, srednia
-FROM sredniawydzialu
-WHERE srednia=(SELECT MAX(srednia) FROM sredniawydzialu);
+SELECT wydzial, pensja
+FROM wydzialpensja
+WHERE pensja=(SELECT MAX(pensja) FROM wydzialpensja);
 
+IV opcja:
+with srednia_wydzialu as (
+select w.nazwa as nazwa, avg(pensja) as srednia  from wydzialy w 
+join zatrudnienia z on w.ID_W=z.ID_W
+where z.do is null
+group by w.nazwa)
+select initcap(sw.nazwa) as nazwa, round(sw.srednia,2) as srednia from srednia_wydzialu sw
+minus
+select initcap(sw.nazwa) as nazwa, round(sw.srednia,2) as srednia from srednia_wydzialu sw
+where srednia = (select max(srednia) from srednia_wydzialu)
+order by srednia desc;
 
 Zadanie 2
 Dla poszczególnych wydziałów, wyświetlić średnią z aktualnie zarobionych pensji, przy czym nie wyświetlać wydziałów, na których są dwie największe średnie.
@@ -53,30 +61,81 @@ ORDER BY 2 ASC;
 II sposob:
 
 WITH srednia_pensja2 AS
-(SELECT nazwa, srednia
-FROM srednia_wydzialu
+(SELECT wydzial, pensja
+FROM wydzialpensja
 MINUS
-SELECT nazwa, srednia
-FROM srednia_wydzialu
-WHERE srednia=(SELECT MAX(srednia) FROM srednia_wydzialu))
-select nazwa, srednia
-from srednia_pesnja2
+SELECT wydzial, pensja
+FROM wydzialpensja
+WHERE pensja=(SELECT MAX(pensja) FROM wydzialpensja))
+select wydzial, pensja
+from srednia_pensja2
 MINUS 
-select nazwa, srednia
-from srednia_pesnja2
-where srednia >(select max(srednia) from srednia_pesdnja2)
+select wydzial, pensja
+from srednia_pensja2
+where pensja >(select max(pensja) from srednia_pensja2);
 
 III sposob -> Ania Rokicka
 
 
 Zadanie 3
-Jak poprzednie ale wyrzucic 3. Do domu.
+select INITCAP(wydzial) as Wydzial, pensja 
+from WydzialPensja
+where pensja < (select MAX(pensja) 
+                from WydzialPensja
+                where pensja < (select MAX(pensja)
+                                from WydzialPensja
+                                where pensja < (select MAX(pensja)
+                                from WydzialPensja)
+                                )
+                )
+ORDER BY 2 ASC;
+
+
 
 
 Zadanie 4 do domu
 Wyswietlic osoby wraz z dlugoscia ich imienia bez osoby o najdluzszym imieniu. O dwoch najdluzszych i o 3 najdluzszych.
 
+create view DlugoscImie AS
+select initcap(imie1) as imie, LENGTH(imie1) as dlugosc
+from Osoby
+group by initcap(imie1), LENGTH(imie1) 
+order by 1 ASC;
 
+select * from DLUGOSCIMIE;
+
+Bez osoby o najdłuższym imieniu:
+select imie, dlugosc 
+from DlugoscImie
+where dlugosc < (select MAX(dlugosc)
+from DlugoscImie);
+
+Bez dwóch osób o najdłuższym imieniu:
+select imie, dlugosc 
+from DlugoscImie
+where dlugosc < (select MAX(dlugosc)
+                from DlugoscImie
+                where dlugosc < (select MAX(dlugosc)
+                                 from DlugoscImie
+                                 )
+               );
+
+			   
+			   
+Bez trzech osób o najdluższym imieniu:			   
+select imie, dlugosc 
+from DlugoscImie
+where dlugosc < (select MAX(dlugosc)
+                from DlugoscImie
+                where dlugosc < (select MAX(dlugosc)
+                                 from DlugoscImie
+                                 where dlugosc < (select MAX(dlugosc)
+                                                  from DlugoscImie)    
+                                )
+               );
+			   
+			   
+			   
 Zadanie 5 PL/SQL
 
 Napisać kod bloku anonimowego w jezyku PL/SQL za pomocą którego z tabeli osoby, bedzie można wyświetlić dane osoby o danym nazwisku i imieniu. np. Lis, Jan, któe zostaną podane poprzez zainicjowanie odpowiednich zmiennych PL/SQL-owych w sekcji deklaracji bloku. 
