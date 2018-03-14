@@ -1,0 +1,153 @@
+Zadanie 1 
+Zdefiniowaæ typ rekordowy przeznaczony do przechowywania nastepujacych informacji o osobach:
+id, nazwisko, imiona, data urodzenia i plec. Przy czym typ rekordowy zdefiniowac: 
+a) w sposób jawny 
+b) w sposób niejawny.
+Nastêpnie przy jego wykorzystaniu wyswietlic dane osoby z tabeli osoby, 
+których id jest dane poprzez zainicjowanie odpowiedniej zmiennnej PL/SQL w sekcji deklaracji.
+
+a)
+
+declare 
+TYPE info_osoby IS RECORD (
+z_id osoby.id_os%TYPE, --lepiej p_id
+z_nazwisko osoby.nazwisko%TYPE,
+z_imie1 osoby.imie1%TYPE,
+z_imie2 osoby.imie2%TYPE,
+z_data osoby.d_ur%TYPE,
+z_plec osoby.plec%TYPE
+);
+z_id2 osoby.id_os%TYPE := 3;
+z_osoba info_osoby; --lepiej r_osoba
+begin 
+select id_os, initcap(nazwisko), initcap(imie1), initcap(imie2), d_ur, plec
+into z_osoba.z_id, z_osoba.z_nazwisko, z_osoba.z_imie1, z_osoba.z_imie2, z_osoba.z_data, z_osoba.z_plec
+from osoby
+where id_os = z_id2;
+dbms_output.put_line(z_osoba.z_id||' '||z_osoba.z_nazwisko||' '||z_osoba.z_imie1||' '||z_osoba.z_imie2||' '||z_osoba.z_data||' '||z_osoba.z_plec);
+end;
+/
+
+
+declare 
+TYPE info_osoby IS RECORD (
+z_id osoby.id_os%TYPE, --lepiej p_id
+z_nazwisko osoby.nazwisko%TYPE,
+z_imie1 osoby.imie1%TYPE,
+z_imie2 osoby.imie2%TYPE,
+z_data osoby.d_ur%TYPE,
+z_plec osoby.plec%TYPE
+);
+z_id2 osoby.id_os%TYPE := 3;
+z_osoba info_osoby; --lepiej r_osoba
+begin 
+select id_os, initcap(nazwisko), initcap(imie1), initcap(imie2), d_ur, plec
+into z_osoba
+from osoby
+where id_os = z_id2;
+dbms_output.put_line(z_osoba.z_id||' '||z_osoba.z_nazwisko||' '||z_osoba.z_imie1||' '||z_osoba.z_imie2||' '||z_osoba.z_data||' '||z_osoba.z_plec);
+end;
+/
+
+b)
+
+DECLARE
+  z_id2 osoby.id_os%TYPE := 3;
+  z_osoba osoby%ROWTYPE;
+begin
+  SELECT id_os,
+    initcap(nazwisko),
+    initcap(imie1),
+    initcap(imie2),
+    d_ur,
+    plec
+  INTO z_osoba
+  FROM osoby
+  WHERE id_os = z_id2;
+  dbms_output.put_line(z_osoba.id_os||' '||z_osoba.nazwisko||' '||z_osoba.imie1||' '||z_osoba.imie2||' '||z_osoba.d_ur||' '||z_osoba.plec);
+END;
+/
+
+Zadanie 2
+
+Zdefiniowaæ dwa typy rekordowe t_osoba1 i t_osoba2 sk³adaj¹ce siê z nastêpuj¹cych pól p_id_os, p_nazwisko, p_imie1
+i p_d_ur. Nastêpnie zadeklarowaæ po dwie zmienne dla ka¿dego z typów: r_osoba11 r_osoba12 
+r_osoba21, r_osoba22. Do r_osoba11 przypisac nastêpuj¹ce dane 1 Kowalska Maria 05/05/1990.
+Wykonaæ operacje przypisania pozosta³ym zmiennym rekordowym za pomoca ró¿nych sposobów przypisywania wartoœci
+rekordom. 
+
+declare 
+TYPE t_osoba1 IS RECORD (
+p_id_os osoby.id_os%TYPE, 
+p_nazwisko osoby.nazwisko%TYPE,
+p_imie1 osoby.imie1%TYPE,
+p_d_ur osoby.d_ur%TYPE
+);
+TYPE t_osoba2 IS RECORD (
+p_id_os osoby.id_os%TYPE, 
+p_nazwisko osoby.nazwisko%TYPE,
+p_imie1 osoby.imie1%TYPE,
+p_d_ur osoby.d_ur%TYPE
+);
+
+r_osoba11 t_osoba1;
+r_osoba12 t_osoba1;
+r_osoba21 t_osoba2;
+r_osoba22 t_osoba2;
+
+begin 
+r_osoba11.p_id_os :=1;
+r_osoba11.p_nazwisko :='Kowalska';
+r_osoba11.p_imie1 := 'Maria';
+r_osoba11.p_d_ur :=to_date('05/05/1990','dd/mm/yyyy');
+
+--r_osoba12 :=r_osoba11; --Isposob
+
+r_osoba12.p_id_os :=r_osoba11.p_id_os;
+r_osoba12.p_nazwisko :=r_osoba11.p_nazwisko;
+r_osoba12.p_imie1 := r_osoba11.p_imie1;
+r_osoba12.p_d_ur :=r_osoba11.p_d_ur;
+
+
+--r_osoba22 := r_osoba11; --nie dziala
+--nie wolno przypisywaæ zmiennych z dwóch niekompatybilnych typów
+
+r_osoba21.p_id_os :=r_osoba11.p_id_os;
+r_osoba21.p_nazwisko :=r_osoba11.p_nazwisko;
+r_osoba21.p_imie1 := r_osoba11.p_imie1;
+r_osoba21.p_d_ur :=r_osoba11.p_d_ur;
+
+dbms_output.put_line(r_osoba12.p_id_os||' '||r_osoba12.p_nazwisko||' '||r_osoba12.p_imie1||' '||r_osoba12.p_d_ur);
+dbms_output.put_line(r_osoba21.p_id_os||' '||r_osoba21.p_nazwisko||' '||r_osoba21.p_imie1||' '||r_osoba21.p_d_ur);
+
+end;
+/
+
+Zadanie 3 
+Za pomoc¹  zmiennej rekordowej o typie rekordowym o nazwie dane_osoby wprowadzic do tabelki osoby nastêpuj¹ce dane
+31 Paw³owska Marta 23/05/1982 K 
+Operacje zatwierdziæ w sposób jawny
+
+DECLARE
+TYPE dane_osoby
+IS
+  RECORD
+  (
+    p_id_os osoby.id_os%TYPE, --lepiej p_id
+    p_nazwisko osoby.nazwisko%TYPE,
+    p_imie1 osoby.imie1%TYPE,
+    p_imie2 osoby.imie2%TYPE,
+    p_d_ur osoby.d_ur%TYPE,
+    p_plec osoby.plec%TYPE );
+  r_osoba dane_osoby; --lepiej r_osoba
+BEGIN
+  r_osoba.p_id_os    :=31;
+  r_osoba.p_nazwisko :='Pawlowska';
+  r_osoba.p_imie1    := 'Marta';
+  r_osoba.p_imie2    :=NULL;
+  r_osoba.p_d_ur     :=to_date('23/05/1982','dd/mm/yyyy');
+  r_osoba.p_plec     := 'K';
+  INSERT INTO osoby VALUES r_osoba;
+  COMMIT;
+END;
+/
