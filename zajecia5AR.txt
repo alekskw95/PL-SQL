@@ -29,3 +29,63 @@ BEGIN
 END;
 /
 
+Zadanie 2 
+Zadeklarowaæ podtyp u¿ytkownika a nastêpnie dwie zmienne tego podtypu za pomoc¹ których bedzie mo¿na 
+wyœwietliæ inicja³y osoby której id jest dane których id jest dane poprzez zainicjowanie odpowiedniej 
+zmiennnej PL/SQL w sekcji deklaracji.
+
+Osoba Jan Lis ma inicja³y J.L.
+
+
+DECLARE
+
+SUBTYPE t_inicjaly IS CHAR(1);
+
+r_pierwsza_litera t_inicjaly;
+r_druga_litera t_inicjaly;
+z_id osoby.id_os%TYPE:=3;
+z_imie osoby.imie1%TYPE;
+z_nazwisko osoby.nazwisko%TYPE;
+
+BEGIN
+
+select initcap(imie1),  initcap(nazwisko),substr(initcap(imie1),1,1), substr(initcap(nazwisko),1,1)
+into z_imie, z_nazwisko, r_pierwsza_litera, r_druga_litera
+from osoby
+where id_os = z_id;
+
+dbms_output.put_line('Osoba '||z_imie||' '||z_nazwisko||' ma inicjaly '||r_pierwsza_litera||'.'||r_druga_litera||'.');
+
+END;
+/
+
+Zadanie 3
+Napisac kod bloku anonimowego w jêzyku plsql za pomoca ktorego dla danej osoby z tabeli osoby ktorej 
+id jest dane poprzez zainicjowanie odpowiedniej zmiennnej PL/SQL w sekcji deklaracji
+bedzie wyswietlony odpowiedni komunikat dotyczacy sumy dlugosci jej nazwiska i imienia 
+gdy ta dlugosc jest nie wieksza niz 10 - osoba o malej sumie dlugosci nazwiska i imienia
+zas gdy od 11 do 20 - osoba o duzej sumie dlugosci nazwiska i imienia
+natomiast powyzej 20 - osoba o bardzo duzej  sumie dlugosci nazwiska i imienia
+
+DECLARE
+z_id osoby.id_os%TYPE:=6;
+z_dlugosc number;
+z_imie osoby.imie1%TYPE;
+z_nazwisko osoby.nazwisko%TYPE;
+
+BEGIN
+select length(imie1)+length(nazwisko), initcap(imie1), initcap(nazwisko)
+into z_dlugosc, z_imie, z_nazwisko
+from osoby
+where id_os = z_id;
+
+IF z_dlugosc <11 THEN 
+dbms_output.put_line('Osoba '||z_imie||' '||z_nazwisko||' to osoba o malej sumie dlugosci nazwiska i imienia.');
+ELSIF z_dlugosc >10 AND z_dlugosc <20 THEN
+dbms_output.put_line('Osoba '||z_imie||' '||z_nazwisko||' to osoba o duzej sumie dlugosci nazwiska i imienia.');
+ELSE
+dbms_output.put_line('Osoba '||z_imie||' '||z_nazwisko||' to osoba o bardzo duzej sumie dlugosci nazwiska i imienia.');
+END IF;
+END;
+/
+
