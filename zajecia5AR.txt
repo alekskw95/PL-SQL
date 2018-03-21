@@ -1,0 +1,31 @@
+Zadanie 1
+Za pomoca zmiennej rekordowej dokonaæ korekty b³êdnych danych wstawionych do tabeli osoby. 
+nazwisko - Pawlowska
+imie - Maria
+data ur -18 05 1992
+
+DECLARE
+ TYPE dane_osoby
+IS
+  RECORD
+  (
+    p_id_os osoby.id_os%TYPE, --lepiej p_id
+    p_nazwisko osoby.nazwisko%TYPE,
+    p_imie1 osoby.imie1%TYPE,
+    p_imie2 osoby.imie2%TYPE,
+    p_d_ur osoby.d_ur%TYPE,
+    p_plec osoby.plec%TYPE );
+    
+r_osoba dane_osoby;
+BEGIN
+  r_osoba.p_id_os    :=31;
+  r_osoba.p_nazwisko :='Pawlowska';
+  r_osoba.p_imie1    := 'Maria';
+  r_osoba.p_imie2    :=NULL;
+  r_osoba.p_d_ur     :=to_date('18/05/1992','dd/mm/yyyy');
+  r_osoba.p_plec     := 'K';
+  UPDATE  osoby SET ROW= r_osoba WHERE id_os=r_osoba.p_id_os;
+  COMMIT;
+END;
+/
+
