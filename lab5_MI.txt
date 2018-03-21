@@ -1,0 +1,138 @@
+1. Za pomoc¹ zmiennej rekordowej dokonac korekty b³ednych danych wstawionych do tabeli osoby
+nazwisko - Paw³owska
+imie -Maria
+data ur. - 18/05/1992
+
+DECLARE
+TYPE dane_osoby
+IS
+  RECORD
+  (
+    p_id_os osoby.id_os%TYPE,
+    p_nazwisko osoby.nazwisko%TYPE,
+    p_imie1 osoby.imie1%TYPE,
+    p_imie2 osoby.imie2%TYPE,
+    p_d_ur osoby.d_ur%TYPE,
+    p_plec osoby.plec%TYPE );
+  r_osoba dane_osoby;
+BEGIN
+  r_osoba.p_id_os    :=31;
+  r_osoba.p_nazwisko :='Pawlowska';
+  r_osoba.p_imie1    := 'Marta';
+  r_osoba.p_d_ur     :=to_date('18/05/1992','dd/mm/yyyy');
+  r_osoba.p_plec := 'K';
+  UPDATE osoby
+  SET ROW=r_osoba
+  WHERE id_os=r_osoba.p_id_os;
+  COMMIT;
+END;
+/
+
+2. Zadeklarowaæ podtyp uzytkowanika a nastepnie dwie zmienne tego typu, za pomoc¹ których bêdzie mozna wyœwietliæ inicja³y osoby, której id jest zainicjonowane przez odp sekcje deklatacji (Osoba Jan Lis ma inicja³yJ.L.)
+
+DECLARE 
+  TYPE dane_osoby IS RECORD(
+    p_id_os osoby.id_os%TYPE,
+    p_imie osoby.imie1%TYPE,
+    p_nazwisko osoby.nazwisko%TYPE
+  );
+  r_osoba dane_osoby;
+  SUBTYPE inicjaly IS CHAR(1);
+  s_inicjal_imienia inicjaly;
+  s_inicjal_nazwiska inicjaly;
+  
+  BEGIN
+    r_osoba.p_id_os:=1;
+    SELECT INITCAP(imie1), INITCAP(nazwisko), SUBSTR(INITCAP(imie1),1,1), SUBSTR(INITCAP(nazwisko),1,1)
+    INTO r_osoba.p_imie, r_osoba.p_nazwisko, s_inicjal_imienia, s_inicjal_nazwiska
+    FROM osoby
+    WHERE id_os= r_osoba.p_id_os;
+    DBMS_OUTPUT.PUT_LINE('Osoba '||r_osoba.p_imie||' '|| r_osoba.p_nazwisko||' ma inicjaly '|| s_inicjal_imienia||'.'||s_inicjal_nazwiska||'.'); 
+END;
+/
+
+
+3. Napisac kod bloku anonimowego w PLSQL za pomoc¹ którego dla danej osoby z tabelki osoby, której id podane jest przed zainicjonowanie w sekcji deklaracji, bedzie wyswiettlony odpowiedni komunikat dotyczacy sumy dlugosci nazwiska i imienia, a mianowicie gdy ta dl jest mniejsza niz 10 - osoba o ma³ej sumie d³ nazwiska i imienia, zaœ gdy os 11 do 20 -  osoba o du¿ej sumie d³ nazwiska i imienia, natomist powy¿ej 20 - osoba o bardzo du¿ej sumie d³ nazwiska i imienia.
+
+DECLARE
+  z_id_os osoby.id_os%TYPE:=1;
+  z_imie1 osoby.imie1%TYPE;
+  z_nazwisko osoby.nazwisko%TYPE;
+  z_suma NUMBER:=0;
+BEGIN
+  SELECT INITCAP(imie1), INITCAP(nazwisko), LENGTH(imie1)+LENGTH(nazwisko)
+  INTO  z_imie1, z_nazwisko, z_suma
+  FROM osoby
+  WHERE id_os=z_id_os;
+  DBMS_OUTPUT.PUT_LINE(z_imie1||' '||z_nazwisko);
+  IF z_suma <10 THEN
+    DBMS_OUTPUT.PUT_LINE('osoba o ma³ej sumie d³ nazwiska i imienia');
+  ELSIF z_suma>11 AND z_suma <20 THEN
+     DBMS_OUTPUT.PUT_LINE('osoba o du¿ej sumie d³ nazwiska i imienia');
+  ELSE 
+    DBMS_OUTPUT.PUT_LINE('osoba o bardzo du¿ej sumie d³ nazwiska i imienia');
+  END IF;
+END;
+/
+
+4. Napisac kod bloku anonimowego w PLSQL za pomoc¹ którego bedzie podawal dla wybranej osoby przez id w zmiennej nastepujacy komunikat Jan LI(S jest osoba urodzona w lipcu. Zastosowac instrukcje case sprawdzajaca
+
+DECLARE
+  z_id_os osoby.id_os%TYPE:=1;
+  z_imie1 osoby.imie1%TYPE;
+  z_nazwisko osoby.nazwisko%TYPE;
+  z_miesiac_ur VARCHAR2(20);
+BEGIN
+  SELECT INITCAP(imie1), INITCAP(nazwisko), TO_CHAR(d_ur,'MM') 
+  INTO  z_imie1, z_nazwisko, z_miesiac_ur
+  FROM osoby
+  WHERE id_os=z_id_os;
+  DBMS_OUTPUT.PUT_LINE(z_imie1||' '||z_nazwisko||' '||z_miesiac_ur);
+  CASE z_miesiac_ur
+    WHEN '01' THEN DBMS_OUTPUT.PUT_LINE(z_imie1||' '||z_nazwisko||' jest osob¹ urodzon¹ w styczniu');
+    WHEN '02' THEN DBMS_OUTPUT.PUT_LINE(z_imie1||' '||z_nazwisko||' jest osob¹ urodzon¹ w lutym');
+    WHEN '03' THEN DBMS_OUTPUT.PUT_LINE(z_imie1||' '||z_nazwisko||' jest osob¹ urodzon¹ w marcu');
+    WHEN '04' THEN DBMS_OUTPUT.PUT_LINE(z_imie1||' '||z_nazwisko||' jest osob¹ urodzon¹ w kwietniu');
+    WHEN '05' THEN DBMS_OUTPUT.PUT_LINE(z_imie1||' '||z_nazwisko||' jest osob¹ urodzon¹ w maju');
+    WHEN '06' THEN DBMS_OUTPUT.PUT_LINE(z_imie1||' '||z_nazwisko||' jest osob¹ urodzon¹ w czerwcu');
+    WHEN '07' THEN DBMS_OUTPUT.PUT_LINE(z_imie1||' '||z_nazwisko||' jest osob¹ urodzon¹ w lipcu');
+    WHEN '08' THEN DBMS_OUTPUT.PUT_LINE(z_imie1||' '||z_nazwisko||' jest osob¹ urodzon¹ w sierpniu');
+    WHEN '09' THEN DBMS_OUTPUT.PUT_LINE(z_imie1||' '||z_nazwisko||' jest osob¹ urodzon¹ w wrzeœniu');
+    WHEN '10' THEN DBMS_OUTPUT.PUT_LINE(z_imie1||' '||z_nazwisko||' jest osob¹ urodzon¹ w paŸdzierniku');
+    WHEN '11' THEN DBMS_OUTPUT.PUT_LINE(z_imie1||' '||z_nazwisko||' jest osob¹ urodzon¹ w listopadzie');
+    WHEN '12' THEN DBMS_OUTPUT.PUT_LINE(z_imie1||' '||z_nazwisko||' jest osob¹ urodzon¹ w grudniu');
+  END CASE;
+END;
+/
+
+5.Napisac kod bloku anonimowego w PLSQL za pomoc¹ którego wybranej osoby przez id w zmiennej wyswietlic komunikat jej aktualnej pensji a mianowicie, jesli pensja 
+jest mniejsza niz 1000 - grupaI, 
+1001 do 1400 - grupaII, 
+1401 do 1700 - grupaIII, 
+1701 do 2000 - grupaIV,
+2501 do 3000 - grupaV,
+powy¿ej 6000- ...
+'Osoba o id=1 i pensji 2750 nalezy do grupyV wynagordzenia'
+
+DECLARE
+  z_id_os osoby.id_os%TYPE:=3;
+  z_imie1 osoby.imie1%TYPE;
+  z_nazwisko osoby.nazwisko%TYPE;
+  z_pensja zatrudnienia.pensja%TYPE;
+  z_grupa VARCHAR2(10);
+BEGIN
+  SELECT INITCAP(o.imie1), INITCAP(o.nazwisko), z.pensja
+  INTO z_imie1, z_nazwisko, z_pensja
+  FROM osoby o JOIN zatrudnienia z ON o.id_os=z.id_os
+  WHERE o.id_os=z_id_os AND z.do IS NULL;
+  CASE
+    WHEN z_pensja <1000 THEN z_grupa:='grupaI';
+    WHEN z_pensja >=1001 AND z_pensja<1400 THEN z_grupa:='grupaII';
+    WHEN z_pensja >=1401 AND z_pensja<1700 THEN z_grupa:='grupaIII';
+    WHEN z_pensja >=1701 AND z_pensja<2000 THEN z_grupa:='grupaIV';
+    WHEN z_pensja >=2000 AND z_pensja >3000 THEN z_grupa:='grupaV';
+    WHEN z_pensja >=3000  THEN z_grupa:='grupaVI';
+  END CASE;
+DBMS_OUTPUT.PUT_LINE('Osoba o id='||z_id_os||' i pensji '||z_pensja||' nale¿y do '||z_grupa||' wynagrodzenia');
+END;
+/
