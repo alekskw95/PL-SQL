@@ -89,3 +89,85 @@ END IF;
 END;
 /
 
+Zadanie 4
+Napisac kod bloku anonimowego w jêzyku plsql za pomoca ktorego bêdzie podawa³ dla wybranej osoby ktorej 
+id jest dane poprzez zainicjowanie odpowiedniej zmiennnej PL/SQL w sekcji deklaracji nastepujacy komunikat
+Jan Lis jest osoba urodzona w lipcu. 
+Zastosowac instrukcje case sprawdzajaca . 
+
+DECLARE
+z_id osoby.id_os%TYPE:=9;
+z_imie osoby.imie1%TYPE;
+z_nazwisko osoby.nazwisko%TYPE;
+z_miesiac number;
+z_nazwa varchar(30);
+
+BEGIN
+select initcap(imie1), initcap(nazwisko), to_number(to_char(d_ur,'mm'))
+into z_imie, z_nazwisko, z_miesiac
+from osoby
+where id_os = z_id;
+
+CASE z_miesiac 
+WHEN 1 THEN z_nazwa:='styczniu';
+WHEN 2 THEN z_nazwa:='lutym';
+WHEN 3 THEN z_nazwa:='marcu';
+WHEN 4 THEN z_nazwa:='kwietniu';
+WHEN 5 THEN z_nazwa:='maju';
+WHEN 6 THEN z_nazwa:='czerwcu';
+WHEN 7 THEN z_nazwa:='lipcu';
+WHEN 8 THEN z_nazwa:='sierpniu';
+WHEN 9 THEN z_nazwa:='wrzeœniu';
+WHEN 10 THEN z_nazwa:='paŸdzierniku';
+WHEN 11 THEN z_nazwa:='listopadzie';
+WHEN 12 THEN z_nazwa:='grudniu';
+END CASE;
+
+dbms_output.put_line(z_imie||' '||z_nazwisko||' jest osob¹ urodzon¹ w '||z_nazwa||'.');
+END;
+/
+
+Zadanie 5
+Napisac kod bloku anonimowego w jêzyku plsql za pomoca ktorego bêdzie podawa³ dla wybranej akttualnie zatrudnionej osoby ktorej 
+id jest dane poprzez zainicjowanie odpowiedniej zmiennnej PL/SQL w sekcji deklaracji nastepujacy komunikat dotyczacy
+jej aktualnej pensji 
+jeœli pensja <1000 grupa I zaszeregowania
+jeœli jest od 1001-1400 grupa 2
+jeœli 1401 - 1700 grupa 3 
+1700-2000 grupa 4
+2500-3000 grupa 5
+....
+powyzej 6000 grupa
+
+osoba o id i pensji 2750 nalezy do grupy 5 wynagrodzej. Zatosowac case spradwzajacy. 
+
+DECLARE
+z_id osoby.id_os%TYPE:=12;
+z_pensja zatrudnienia.pensja%TYPE;
+z_grupa varchar2(10);
+
+BEGIN
+select z.pensja
+into z_pensja
+from osoby o join zatrudnienia z on o.id_os=z.id_os
+where o.id_os = z_id
+and z.do is null;
+
+CASE 
+WHEN z_pensja <1001 THEN z_grupa:='I';
+WHEN z_pensja BETWEEN 1001 AND 1400 THEN z_grupa:='II';
+WHEN z_pensja BETWEEN 1401 AND 1700 THEN z_grupa:='III';
+WHEN z_pensja BETWEEN 1701 AND 2000 THEN z_grupa:='IV';
+WHEN z_pensja BETWEEN 2001 AND 2500 THEN z_grupa:='V';
+WHEN z_pensja BETWEEN 2501 AND 3000 THEN z_grupa:='VI';
+WHEN z_pensja BETWEEN 3001 AND 3500 THEN z_grupa:='VII';
+WHEN z_pensja BETWEEN 4001 AND 4500 THEN z_grupa:='VIII';
+WHEN z_pensja BETWEEN 4501 AND 5000 THEN z_grupa:='IX';
+WHEN z_pensja BETWEEN 5001 AND 5500 THEN z_grupa:='X';
+WHEN z_pensja BETWEEN 5501 AND 6000 THEN z_grupa:='XI';
+WHEN z_pensja>6000 THEN z_grupa:='XII';
+END CASE;
+
+dbms_output.put_line('Osoba o id='||z_id||' i pensji '||z_pensja||' nalezy do grupy '||z_grupa||' wynagrodzen.');
+END;
+/
