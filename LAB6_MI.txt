@@ -1,0 +1,151 @@
+Pêtle, kursory
+
+1. Napisaæ kod bloku anonimowego w jezyku plsql takiego który dla kazdej osoby z tabeli osoby wyswietli nastepujacy komuniakt: 1. Duda Barbara ma inicja³y D.B.
+a) petla prosta
+
+DECLARE
+  z_licznik INT;
+  z_liczba_osob NUMBER(6);
+  z_imie osoby.imie1%TYPE;
+  z_nazwisko osoby.nazwisko%TYPE;
+  SUBTYPE inicjal IS CHAR(1);
+  z_inicjalI inicjal;
+  z_inicjalN inicjal;
+  
+  
+BEGIN
+  SELECT COUNT(id_os)
+  INTO z_liczba_osob
+  FROM osoby;
+  z_licznik:=1;
+  LOOP
+    SELECT INITCAP(imie1), INITCAP(nazwisko), INITCAP(SUBSTR(imie1,1,1)), INITCAP(SUBSTR(nazwisko,1,1))
+    INTO z_imie, z_nazwisko, z_inicjalI, z_inicjalN
+    FROM osoby
+    WHERE z_licznik=id_os;
+  
+    DBMS_OUTPUT.PUT_LINE(z_licznik||'. '|| z_imie||' '||z_nazwisko||' ma inicjaly '||z_inicjalI||'.'||z_inicjalN||'.');
+    z_licznik:=z_licznik+1;
+    IF z_licznik > z_liczba_osob THEN EXIT;
+    END IF;
+  END LOOP;
+END;
+/
+
+b) pêtla while
+
+DECLARE
+  z_licznik INT;
+  z_liczba_osob NUMBER(6);
+  z_imie osoby.imie1%TYPE;
+  z_nazwisko osoby.nazwisko%TYPE;
+  SUBTYPE inicjal IS CHAR(1);
+  z_inicjalI inicjal;
+  z_inicjalN inicjal;
+  
+  
+BEGIN
+  SELECT COUNT(id_os)
+  INTO z_liczba_osob
+  FROM osoby;
+  z_licznik:=1;
+  WHILE z_licznik <= z_liczba_osob LOOP
+    SELECT INITCAP(imie1), INITCAP(nazwisko), INITCAP(SUBSTR(imie1,1,1)), INITCAP(SUBSTR(nazwisko,1,1))
+    INTO z_imie, z_nazwisko, z_inicjalI, z_inicjalN
+    FROM osoby
+    WHERE z_licznik=id_os;
+  
+    DBMS_OUTPUT.PUT_LINE(z_licznik||'. '|| z_imie||' '||z_nazwisko||' ma inicjaly '||z_inicjalI||'.'||z_inicjalN||'.');
+    z_licznik:=z_licznik+1;
+  END LOOP;
+END;
+/
+
+wykorzystaæ kursor niejawny!
+-------------------------------------------
+c) pêtla prosta z kursorem jawnym
+
+DECLARE
+  z_licznik INT;
+  z_liczba_osob NUMBER(6);
+  z_imie osoby.imie1%TYPE;
+  z_nazwisko osoby.nazwisko%TYPE;
+  SUBTYPE inicjal IS CHAR(1);
+  z_inicjalI inicjal;
+  z_inicjalN inicjal;
+  
+  CURSOR k_osoby IS 
+  SELECT INITCAP(imie1), INITCAP(nazwisko), INITCAP(SUBSTR(imie1,1,1)), INITCAP(SUBSTR(nazwisko,1,1))
+  FROM osoby;
+  
+BEGIN
+
+  SELECT COUNT(id_os)
+  INTO z_liczba_osob
+  FROM osoby;
+  z_licznik:=1;
+  
+  OPEN k_osoby;
+  LOOP
+    FETCH k_osoby INTO z_imie, z_nazwisko, z_inicjalI, z_inicjalN;
+  
+    DBMS_OUTPUT.PUT_LINE(z_licznik||'. '|| z_imie||' '||z_nazwisko||' ma inicjaly '||z_inicjalI||'.'||z_inicjalN||'.');
+    z_licznik:=z_licznik+1;
+    IF z_licznik > z_liczba_osob THEN EXIT;
+    END IF;
+  END LOOP;
+  CLOSE k_osoby;
+END;
+/
+
+
+d) pêtla for z kursorem jawnym
+
+DECLARE
+  
+  CURSOR k_osoby IS 
+  SELECT id_os, INITCAP(imie1) z_imie, INITCAP(nazwisko) z_nazwisko, INITCAP(SUBSTR(imie1,1,1)) z_inicjalI, INITCAP(SUBSTR(nazwisko,1,1)) z_inicjalN
+  FROM osoby;
+  
+BEGIN
+
+  FOR z_osoby IN k_osoby LOOP
+    DBMS_OUTPUT.PUT_LINE(z_osoby.id_os||'. '|| z_osoby.z_imie||' '||z_osoby.z_nazwisko||' ma inicjaly '||z_osoby.z_inicjalI||'.'||z_osoby.z_inicjalN||'.');
+  END LOOP;
+END;
+/
+
+e) pêtla while z kursorem jawnym (NIE SKONCZYLAM TEGO)
+
+DECLARE
+  z_licznik INT;
+  z_liczba_osob NUMBER(6);
+  z_imie osoby.imie1%TYPE;
+  z_nazwisko osoby.nazwisko%TYPE;
+  SUBTYPE inicjal IS CHAR(1);
+  z_inicjalI inicjal;
+  z_inicjalN inicjal;
+  
+  CURSOR k_osoby IS
+  SELECT id_os, INITCAP(imie1), INITCAP(nazwisko), INITCAP(SUBSTR(imie1,1,1)), INITCAP(SUBSTR(nazwisko,1,1))
+  FROM osoby;
+  
+BEGIN
+  
+  OPEN z_osoby
+  FETCH z_osoby INTO z_licznik
+  WHILE z_licznik <= z_liczba_osob LOOP
+    
+  
+    DBMS_OUTPUT.PUT_LINE(z_licznik||'. '|| z_imie||' '||z_nazwisko||' ma inicjaly '||z_inicjalI||'.'||z_inicjalN||'.');
+    z_licznik:=z_licznik+1;
+  END LOOP;
+END;
+/
+
+
+
+
+
+
+
