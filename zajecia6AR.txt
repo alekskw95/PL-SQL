@@ -72,7 +72,7 @@ dbms_output.put_line('Petla prosta');
 open c_osoby;
 loop
 fetch c_osoby into z_licznik, z_imie, z_nazwisko, z_inicjaly;
-dbms_output.put_line(z_licznik||' '||z_imie||' '||z_nazwisko||' ma inicjaly  '||z_inicjaly);
+dbms_output.put_line(z_licznik||' '||z_imie||' '||z_nazwisko||' ma inicjaly '||z_inicjaly);
 exit when z_licznik>=z_max_licz;
 end loop;
 close c_osoby;
@@ -80,14 +80,14 @@ close c_osoby;
 dbms_output.put_line('Petla for');
 
 for i in c_osoby loop
-dbms_output.put_line(i.id_os||' '||i.imie1||' '||i.nazwisko||' ma inicjaly  '||i.inicjaly);
+dbms_output.put_line(i.id_os||' '||i.imie1||' '||i.nazwisko||' ma inicjaly '||i.inicjaly);
 end loop;
 
 dbms_output.put_line('Petla while');
 open c_osoby;
 fetch c_osoby into z_licznik, z_imie, z_nazwisko, z_inicjaly;
 while c_osoby%FOUND loop
-dbms_output.put_line(z_licznik2||' '||z_imie||' '||z_nazwisko||' ma inicjaly  '||z_inicjaly);
+dbms_output.put_line(z_licznik2||' '||z_imie||' '||z_nazwisko||' ma inicjaly '||z_inicjaly);
 z_licznik2:=z_licznik2+1;
 fetch c_osoby into z_licznik, z_imie, z_nazwisko, z_inicjaly;
 end loop;
