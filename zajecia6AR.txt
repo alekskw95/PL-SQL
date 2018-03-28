@@ -1,0 +1,96 @@
+zajecia 6
+
+Zadanie 1
+
+Napisac blok 
+za pomoca ktorego dla kazdej osoby z tabeli osoby zostanie wyswietlony taki komunikat
+1.Duda Barbara ma inicjaly D.B.
+2.Krawczyk Adama ma inicjaly K.A
+a)uzyc petli prostej
+b) uzyc petli while
+uzyc kursora niejawnego 
+
+
+declare 
+z_imie osoby.imie1%TYPE;
+z_nazwisko osoby.nazwisko%TYPE;
+z_inicjaly char(4);
+z_licznik binary_integer :=0;
+z_licznik2 binary_integer :=1;
+z_max_licz number;
+begin 
+
+select count(id_os)
+into z_max_licz
+from osoby;
+
+loop
+z_licznik:=z_licznik+1;
+select initcap(imie1), initcap(nazwisko), substr(initcap(imie1),1,1)||'.'||substr(initcap(nazwisko),1,1)||'.'
+into z_imie, z_nazwisko, z_inicjaly
+from osoby
+where id_os=z_licznik;
+dbms_output.put_line(z_licznik||' '||z_imie||' '||z_nazwisko||' ma inicjaly  '||z_inicjaly);
+exit when z_licznik>=z_max_licz;
+end loop;
+
+while z_licznik<=z_max_licz loop
+select initcap(imie1), initcap(nazwisko), substr(initcap(imie1),1,1)||'.'||substr(initcap(nazwisko),1,1)||'.'
+into z_imie, z_nazwisko, z_inicjaly
+from osoby
+where id_os=z_licznik2;
+dbms_output.put_line(z_licznik2||' '||z_imie||' '||z_nazwisko||' ma inicjaly  '||z_inicjaly);
+z_licznik2:=z_licznik2+1;
+end loop;
+end;
+/
+
+kursor jawny zadanie 1 
+c) petla prosta 
+d) for 
+e) while
+
+declare 
+z_imie osoby.imie1%TYPE;
+z_nazwisko osoby.nazwisko%TYPE;
+z_inicjaly char(4);
+z_licznik binary_integer :=0;
+z_licznik2 binary_integer :=1;
+z_max_licz number;
+
+cursor c_osoby is 
+(select id_os, initcap(imie1) imie1, initcap(nazwisko) nazwisko, substr(initcap(imie1),1,1)||'.'||substr(initcap(nazwisko),1,1)||'.' inicjaly
+from osoby);
+
+begin 
+
+select count(id_os)
+into z_max_licz
+from osoby;
+
+dbms_output.put_line('Petla prosta');
+open c_osoby;
+loop
+fetch c_osoby into z_licznik, z_imie, z_nazwisko, z_inicjaly;
+dbms_output.put_line(z_licznik||' '||z_imie||' '||z_nazwisko||' ma inicjaly  '||z_inicjaly);
+exit when z_licznik>=z_max_licz;
+end loop;
+close c_osoby;
+
+dbms_output.put_line('Petla for');
+
+for i in c_osoby loop
+dbms_output.put_line(i.id_os||' '||i.imie1||' '||i.nazwisko||' ma inicjaly  '||i.inicjaly);
+end loop;
+
+dbms_output.put_line('Petla while');
+open c_osoby;
+fetch c_osoby into z_licznik, z_imie, z_nazwisko, z_inicjaly;
+while c_osoby%FOUND loop
+dbms_output.put_line(z_licznik2||' '||z_imie||' '||z_nazwisko||' ma inicjaly  '||z_inicjaly);
+z_licznik2:=z_licznik2+1;
+fetch c_osoby into z_licznik, z_imie, z_nazwisko, z_inicjaly;
+end loop;
+close c_osoby;
+end;
+/
