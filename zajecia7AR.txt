@@ -65,13 +65,8 @@ end;
 /
 
 c)
-
 declare 
-z_wydzial wydzialy.nazwa%TYPE;
-z_litera char(1);
-z_osoby number;
 z_licznik number:=1;
-z_max_licz number:=18;
 
 cursor c_dane is 
   select initcap(w.nazwa) wydzial, substr(initcap(o.imie1),1,1) litera, count(z.id_os) licz_osoby
@@ -89,5 +84,31 @@ end loop;
 end;
 /
 
+Zadanie 2 
 
+utworzyc tabele osoby_short o polach nazwa id os nazwisko imie1 imie2 plec od 
+Napisac blok w jezyku plsql z kursorem jawnym
+umozliwiajacym prowadzenie danych do tabeli osoby_short 
+tych osob, które zosta³y najpozniej zatrudnione na kazdym z wydzia³ów
+
+
+
+
+declare 
+cursor k_dane is 
+select initcap(w.nazwa) wydzial,o.id_os id_os,initcap(o.nazwisko) nazwisko, initcap(o.imie1) imie1, initcap(o.imie2) imie2, o.plec plec, z.od od
+from osoby o join zatrudnienia z on z.id_os=o.id_os
+join wydzialy w on w.id_w=z.id_w
+where z.od  = (select max(z1.od) from zatrudnienia z1 
+                 join wydzialy w1 on z1.id_w=w1.id_w
+                where w1.id_w=w.id_w);
+begin 
+for i in k_dane loop
+insert into osoby_short values(i.wydzial, i.id_os, i.nazwisko, i.imie1, i.imie2, i.plec, i.od);
+end loop;
+
+end;
+/
+
+select * from osoby_short;
 
