@@ -1,0 +1,93 @@
+Zadania 1
+
+Napisac blok w jezyku plsql z kursorem jawnym
+umozliwiajacy wyswietlenie dla poszczegolnych wydzialow i poszczegolnych liter alfabetu liczby osob aktualnie 
+zatrudnionych ktorych imie rozpoczyna sie na dana litere w postaci 
+Wydzial Matematyka litera A - 5.
+b) petla while
+c) petla kursora
+
+a)
+
+declare 
+z_wydzial wydzialy.nazwa%TYPE;
+z_litera char(1);
+z_osoby number;
+z_licznik number:=1;
+z_max_licz number:=18;
+
+cursor c_dane is 
+( select initcap(w.nazwa) wydzial, substr(initcap(o.imie1),1,1) litera, count(z.id_os) licz_osoby
+  from wydzialy w join zatrudnienia z on w.id_w = z.id_w
+  join osoby o on z.id_os=o.id_os
+  where z.do is null
+  group by initcap(w.nazwa),substr(initcap(o.imie1),1,1)); 
+  
+begin 
+open c_dane;
+loop
+fetch c_dane into z_wydzial, z_litera, z_osoby;
+exit when c_dane%NOTFOUND;
+dbms_output.put_line(z_licznik||'. Wydzial '||z_wydzial||' litera '||z_litera||' - '||z_osoby);
+z_licznik:=z_licznik+1;
+end loop;
+close c_dane;
+end;
+/
+
+b)
+
+declare 
+z_wydzial wydzialy.nazwa%TYPE;
+z_litera char(1);
+z_osoby number;
+z_licznik number:=1;
+z_max_licz number:=18;
+
+cursor c_dane is 
+( select initcap(w.nazwa) wydzial, substr(initcap(o.imie1),1,1) litera, count(z.id_os) licz_osoby
+  from wydzialy w join zatrudnienia z on w.id_w = z.id_w
+  join osoby o on z.id_os=o.id_os
+  where z.do is null
+  group by initcap(w.nazwa),substr(initcap(o.imie1),1,1)); 
+  
+begin 
+open c_dane;
+fetch c_dane into z_wydzial, z_litera, z_osoby;
+
+while c_dane%FOUND loop
+dbms_output.put_line(z_licznik||'. Wydzial '||z_wydzial||' litera '||z_litera||' - '||z_osoby);
+z_licznik:=z_licznik+1;
+fetch c_dane into z_wydzial, z_litera, z_osoby;
+end loop;
+close c_dane;
+end;
+/
+
+c)
+
+declare 
+z_wydzial wydzialy.nazwa%TYPE;
+z_litera char(1);
+z_osoby number;
+z_licznik number:=1;
+z_max_licz number:=18;
+
+cursor c_dane is 
+  select initcap(w.nazwa) wydzial, substr(initcap(o.imie1),1,1) litera, count(z.id_os) licz_osoby
+  from wydzialy w join zatrudnienia z on w.id_w = z.id_w
+  join osoby o on z.id_os=o.id_os
+  where z.do is null
+  group by initcap(w.nazwa),substr(initcap(o.imie1),1,1); 
+  
+begin 
+for i in c_dane loop
+dbms_output.put_line(z_licznik||'. Wydzial '||i.wydzial||' litera '||i.litera||' - '||i.licz_osoby);
+z_licznik:=z_licznik+1;
+end loop;
+
+end;
+/
+
+
+
