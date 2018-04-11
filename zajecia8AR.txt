@@ -1,0 +1,183 @@
+Zadanie 1 
+Napisac kod bloku anonimowego w jêzyku pl/sql 
+za pomoc¹ którego uzyskamy taki wydruk
+Kierownikiem wydzia³u Matematyki jest Krawczyk Adam 
+
+
+declare 
+z_wydzial wydzialy.nazwa%TYPE;
+cursor k_dane is 
+select initcap(w.nazwa) wydzial, initcap(o.imie1) Dimie, initcap(o.nazwisko) Dnazwisko
+from kierownicy k join wydzialy w on k.id_w=w.id_w
+join osoby o on k.id_os=o.id_os
+where k.do is null;
+begin
+for i in k_dane loop
+CASE i.wydzial 
+WHEN 'Matematyka' THEN z_wydzial:='Matematyki';
+WHEN 'Fizyka' THEN z_wydzial:='Fizyki';
+WHEN 'Prawo' THEN z_wydzial:='Prawa';
+WHEN 'Ekonomia' THEN z_wydzial:='Ekonomii';
+WHEN 'Filologia' THEN z_wydzial:='Filologii';
+WHEN 'Biologia' THEN z_wydzial:='Biologii';
+end case;
+DBMS_OUTPUT.PUT_LINE('Kierownikiem wydzialu '||z_wydzial||' jest '||i.Dnazwisko||' '||i.Dimie||'.');
+end loop;
+end; 
+/
+
+
+Zadanie 2
+Napisac kod bloku anonimowego w jêzyku pl/sql 
+za pomoc¹ którego bêdzie wyœwietlana na poszczególnych wydzialach lista osob aktualnie zatrudnionych przy czym
+ka¿da osoba bedzie poprzedzona kolejna liczba porzadkowa
+
+Lista osób zatrudnionych na wydziale matematyka 
+1. Duda Barbara
+.
+.
+.
+.
+Lista osób zatrudnionycha wydziale matematyka 
+1. Kowalska Maria
+.
+.
+.
+.
+
+declare 
+z_licznik number;
+
+cursor k_wydzialy is 
+select id_w, initcap(nazwa) wydzial
+from wydzialy
+order by 2 asc;
+
+cursor k_zatrudnieni(p_id_w wydzialy.id_w%TYPE) is
+select initcap(o.imie1) Dimie, initcap(o.nazwisko) Dnazwisko
+from osoby o join zatrudnienia z on o.id_os=z.id_os
+where z.ID_W=p_id_w
+and z.do is null
+order by 2 asc;
+
+begin
+for i_rec in k_wydzialy loop
+dbms_output.put_line('Lista osób zatrudnionych na wydziale '||i_rec.wydzial);
+z_licznik:=0;
+for j_rec in k_zatrudnieni(i_rec.id_w) loop
+z_licznik:=z_licznik+1;
+dbms_output.put_line(z_licznik||'. '||j_rec.Dimie||' '||j_rec.Dnazwisko);
+end loop;
+end loop;
+end; 
+/
+
+Zadanie 3
+Napisac kod bloku anonimowego w jêzyku pl/sql 
+za pomoc¹ którego bêdzie wyœwietlany rok miesiac oraz lista osob zatrudniona w tym okresie
+Ma byæ wyswietlony rok zatrudnienia  - (tu podajemy rok ) nastepnie miesiac (cyfra miesiaca) 
+a nastepnie lista osob zatrudnionych w tym okresie poprzedzona liczba porzadkowa z kropk¹
+
+Rok zatrudnia - 2005
+Miesiac zatrudnia - 6 
+1. Duda Barbara
+.
+.
+.
+.
+Miesiac zatrudnia - 10
+1. Kula Katarzyna
+.
+.
+.
+.
+
+Rok zatrudnia - 2004
+Miesiac zatrudnia - 6 
+1. Kowalska Maria
+.
+.
+.
+.
+
+declare 
+z_licznik number;
+z_data varchar2(7);
+
+cursor k_lata is 
+select distinct to_char(od, 'yyyy') rok
+from zatrudnienia
+order by 1 asc;
+
+cursor k_miesiace (p_rok varchar2) is 
+select distinct to_char(od, 'mm') miesiac
+from zatrudnienia
+where to_char(od, 'yyyy')=p_rok
+order by 1 asc;
+
+cursor k_zatrudnieni(p_data varchar2) is
+select initcap(o.imie1) Dimie, initcap(o.nazwisko) Dnazwisko
+from osoby o join zatrudnienia z on o.id_os=z.id_os
+where to_char(z.od, 'yyyy/mm')=p_data
+order by 2 asc, 1 asc;
+
+begin
+for i_rec in k_lata loop
+dbms_output.put_line('Rok zatrudnienia -'||i_rec.rok);
+for j_rec in k_miesiace(i_rec.rok) loop
+dbms_output.put_line('Miesiac zatrudnienia -'||j_rec.miesiac);
+z_licznik:=0;
+z_data:=i_rec.rok||'/'||j_rec.miesiac;
+for k_rec in k_zatrudnieni(z_data) loop
+z_licznik:=z_licznik+1;
+dbms_output.put_line(z_licznik||'. '||k_rec.Dimie||' '||k_rec.Dnazwisko);
+end loop;
+dbms_output.put_line('');
+end loop;
+dbms_output.put_line('');
+end loop;
+end; 
+/
+
+Bez parametrow 
+
+declare 
+z_licznik number;
+z_data varchar2(7);
+z_rok varchar2(4);
+
+cursor k_lata is 
+select distinct to_char(od, 'yyyy') rok
+from zatrudnienia
+order by 1 desc;
+
+cursor k_miesiace is 
+select distinct to_char(od, 'mm') miesiac
+from zatrudnienia
+where to_char(od, 'yyyy')=z_rok
+order by 1 asc;
+
+cursor k_zatrudnieni is
+select initcap(o.imie1) Dimie, initcap(o.nazwisko) Dnazwisko
+from osoby o join zatrudnienia z on o.id_os=z.id_os
+where to_char(z.od, 'yyyy/mm')=z_data
+order by 2 asc, 1 asc;
+
+begin
+for i_rec in k_lata loop
+z_rok:=i_rec.rok;
+dbms_output.put_line('Rok zatrudnienia -'||z_rok);
+for j_rec in k_miesiace loop
+dbms_output.put_line('Miesiac zatrudnienia -'||j_rec.miesiac);
+z_licznik:=0;
+z_data:=i_rec.rok||'/'||j_rec.miesiac;
+for k_rec in k_zatrudnieni loop
+z_licznik:=z_licznik+1;
+dbms_output.put_line(z_licznik||'. '||k_rec.Dimie||' '||k_rec.Dnazwisko);
+end loop;
+dbms_output.put_line('');
+end loop;
+dbms_output.put_line('');
+end loop;
+end; 
+/
