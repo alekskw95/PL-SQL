@@ -70,7 +70,7 @@ Rok zatrudnienia - 2005
 	1. Duda Barbara
 	2. Krawczyk Adam
 
-	Rok zatrudnienia - 10
+	Miesiac zatrudnienia - 10
 	1. Duda Barbara
 	2. Krawczyk Adam
 	
@@ -79,9 +79,9 @@ Rok zatrudnienia - 2004
 		1. Duda Barbara
 		2. Krawczyk Adam
 
-		Rok zatrudnienia - 10
-		1. Duda Barbara
-		2. Krawczyk Adam
+	Miesiac zatrudnienia - 10
+	1. Duda Barbara
+	2. Krawczyk Adam
 
 
 DECLARE
