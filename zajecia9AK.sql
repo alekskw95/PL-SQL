@@ -1,6 +1,6 @@
 Zadanie 1
-Napisac bloku anonimowego PL/SQL, w którym
-a) zostanie pobrany, a nastepnie wydrukowany ROWID przykładowego rekordu danych wstawinego do tabeli osoby
+Napisac kod bloku anonimowego PL/SQL, w którym:
+a) zostanie pobrany, a nastepnie wydrukowany ROWID przykładowego rekordu danych wstawionego do tabeli osoby
 31 Tomcazyk Monika 21/01/1987 K
 b) powyższy ROWID zostanie wykorzystany do aktualizacji powyższej daty do daty 12/01/1987, przy czym z aktualizowanego rekordu zostaną pobrane, a nastepnie wydrukowane id_os, nazwisko, imie1 osoby, której d_ur została zaktualizowana
 c) powyższy ROWID zostanie wykorzystany do usuniecia rekordu, przy czym zostanie pobrane i wydrukowane id_os i d_ur usuwanej osoby.
@@ -34,7 +34,7 @@ END;
 
 
 Zadanie 2
-Napisac kod bloku anonimowego PL/SQL z kursorem jawnym z blokadą, którego zadaniem jest podniesienie aktualnej pensji, wsztyskicm aktualnie zatrudnionym kobietom o 10%. Operacje w sposób jawny zatwierdzić.
+Napisac kod bloku anonimowego PL/SQL z kursorem jawnym z blokadą, którego zadaniem jest podniesienie aktualnej pensji, wszystkim aktualnie zatrudnionym kobietom o 10%. Operacje w sposób jawny zatwierdzić.
 DECLARE
   z_zmiana NUMBER:=1.1;
   
@@ -55,7 +55,7 @@ END;
 /
 
 Zadanie 3
-Napisac kod bloku anonimowego PL/SQL z kursorem jawnym z blokadą, którego zadaniem jest podniesienie aktualnej pensji, wsztyskicm aktualnie zatrudnionym osobom przy czym w puli na podniesienie pensji mamy 10 000zł. Operacje w sposób jawny zatwierdzić.
+Napisac kod bloku anonimowego PL/SQL z kursorem jawnym z blokadą, którego zadaniem jest podniesienie aktualnej pensji, wszystkim aktualnie zatrudnionym osobom przy czym na podniesienie pensji mamy 10 000zł. Operacje w sposób jawny zatwierdzić.
 Wydruk z nowymi i starymi pensjami.
 
 DECLARE
@@ -96,7 +96,7 @@ END;
 
 
 Zadanie 4
-Napisac kod bloku anonimowego PL/SQL z kursorem jawnym z blokadą, którego zadaniem jest podniesienie aktualnej pensji, dokonac podwyzski wszytskim osobom aktualnie pracujacym na danym wydziale, wydzial zadeklarowany poprzez zmienna. Kazda z osob ma dosac taka kwote podwyzki jaka wynika z okresu jej pracy na dnaym wydziawle, czyli z liczby lat przepracownych na dnaym wydziale (za kazdy przepracowany rok osoba dostaje podwyzke wysokosci1/2% swojej aktualnej pensji ).
+Napisac kod bloku anonimowego PL/SQL z kursorem jawnym z blokadą, którego zadaniem jest podniesienie aktualnej pensji, dokonac podwyzski wszytskim osobom aktualnie pracujacym na danym wydziale, wydzial zadeklarowany poprzez zmienna. Kazda z osob ma dosac taka kwote podwyzki jaka wynika z okresu jej pracy na danym wydziale, czyli z liczby lat przepracownych na danym wydziale (za kazdy przepracowany rok osoba dostaje podwyzke wysokosci 1/2% swojej aktualnej pensji ).
 
 DECLARE
   z_IdWydzial wydzialy.id_w%TYPE:=1;
@@ -117,7 +117,7 @@ BEGIN
   FOR i IN k_PrzedPodwyzka LOOP
     z_pensjaPrzed:=i.staraPensja;
     UPDATE zatrudnienia
-    SET pensja=pensja+i.nowaPensja
+    SET pensja=i.nowaPensja
     WHERE CURRENT OF k_PrzedPodwyzka;
     DBMS_OUTPUT.PUT_LINE(i.IDOS||' poprzednia pensja: '||z_pensjaPrzed||' nowa pensja: '||i.nowaPensja);
   END LOOP;
