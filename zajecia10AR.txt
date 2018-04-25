@@ -1,0 +1,194 @@
+Zadanie 1
+
+kolokwium 6 czerwca 
+
+zadeklarowac zmienna z_nazwisko o długosci max 10 znaków w której sekcji 
+wykonawczej przypisac wartosc "Nowak-Konopacka" i obsłużyć wyjątek który się pojawi za pomoca komunikatu zbyt 
+dlugie nazwisko
+
+DECLARE
+  z_nazwisko VARCHAR2(10);
+BEGIN
+  z_nazwisko:='Nowak-Konopacka';
+EXCEPTION
+WHEN value_error THEN
+  dbms_output.put_line('Zbyt dlugie nazwisko');
+END;
+/
+
+DECLARE
+  z_nazwisko VARCHAR2(10);
+BEGIN
+  z_nazwisko:='Nowak-Konopacka';
+EXCEPTION
+WHEN value_error THEN
+raise_application_error(-20000,'Zbyt dugie nazwisko');
+ -- dbms_output.put_line('Zbyt dlugie nazwisko');
+END;
+/
+
+Zadanie 2 
+
+za pomoca kursora niejawnego wyswietlic dane tych osob ktorych id jest wieksze rowne od pewnej 
+liczby naturalnej zadeklarowanej w sekcji deklaracji, w bloku anonimowym z tym kursorem obsluzyc
+wszystkie wyjatki ktore sie moga w nim pojawic z pomoca odpowiednich komentarzy
+
+DECLARE
+  z_id osoby.id_os%TYPE:=50;
+  z_nazwisko osoby.nazwisko%TYPE;
+  z_imie osoby.imie1%TYPE;
+BEGIN
+select nazwisko, imie1
+into z_nazwisko, z_imie
+from osoby 
+where id_os>=z_id;
+
+EXCEPTION
+WHEN too_many_rows THEN
+raise_application_error(-20000,'SELECT INTO zwraca wiecej niz jeden wiersz');
+when no_data_found then 
+raise_application_error(-20010,'Nie ma osob o numerze id wiekszym badz rownym '||z_id);
+END;
+/
+
+
+Zadanie 3 
+
+zanuzyc blok anonimowy z poprzedniego zadania w nadbloku z obsluga tych samych wyjatkow
+usuwac obsluge wyjatkow w podbloku
+
+
+DECLARE
+  z_id osoby.id_os%TYPE:=6;
+  z_nazwisko osoby.nazwisko%TYPE;
+  z_imie osoby.imie1%TYPE;
+BEGIN
+
+  SELECT nazwisko, imie1 INTO z_nazwisko, z_imie FROM osoby WHERE id_os=1;
+  dbms_output.put_line('Osoba ma id_os 1');
+  
+  BEGIN
+    SELECT nazwisko, imie1 INTO z_nazwisko, z_imie FROM osoby WHERE id_os>=z_id;
+  EXCEPTION
+  WHEN too_many_rows THEN
+   -- raise_application_error(-20000,'SELECT INTO zwraca wiecej niz jeden wiersz');
+   dbms_output.put_line('SELECT INTO zwraca wiecej niz jeden wiersz');
+  WHEN no_data_found THEN
+    --raise_application_error(-20010,'Nie znaleziono danych');
+    dbms_output.put_line('Nie znaleziono danych');
+  END;
+  
+EXCEPTION
+WHEN too_many_rows THEN
+  raise_application_error(-20002,'Wiecej niz 1 rekord');
+WHEN no_data_found THEN
+  raise_application_error(-20003,'Nie ma takich id');
+END;
+/
+
+Zadanie 4 
+
+Istnieje potrzeba ogranicznia plac na wsyztskich wydzialach. Nalezy maksymalna aktualnie wyplacana pensje 
+ograniczyc do 4000, jesli aktualnie maksymalna pensja przekracza te wartosc nalezy wyswietlic odpowiedni 
+komunikat
+(2 sposoby)
+
+DECLARE
+  z_pensja zatrudnienia.pensja%TYPE;
+  w_ZbytWysokaPensja EXCEPTION;
+  z_ograniczenie     NUMBER :=4000;
+BEGIN
+  SELECT MAX(pensja) INTO z_pensja FROM zatrudnienia;
+  dbms_output.put_line(z_pensja);
+  IF z_pensja > z_ograniczenie THEN
+    RAISE w_ZbytWysokaPensja;
+  END IF;
+EXCEPTION
+WHEN w_ZbytWysokaPensja THEN
+  DBMS_OUTPUT.PUT_LINE('Zbyt wysoka pensja');
+END;
+/
+
+DECLARE
+  z_pensja zatrudnienia.pensja%TYPE;
+  w_ZbytWysokaPensja EXCEPTION;
+  z_ograniczenie     NUMBER :=4000;
+BEGIN
+  SELECT MAX(pensja) INTO z_pensja FROM zatrudnienia;
+  dbms_output.put_line(z_pensja);
+  IF z_pensja > z_ograniczenie THEN
+    RAISE_APPLICATION_ERROR(-20000, 'Zbyt wysoka pensja');
+  END IF;
+EXCEPTION
+WHEN OTHERS THEN
+  DBMS_OUTPUT.PUT_LINE('Zbyt wysoka pensja');
+END;
+/
+
+Zadanie 5 
+
+Do bazy kadry wprowadzono 2 rekordy 
+do tabeli osoby
+31 Karp Janusz 15/03/1971 M
+Zatrudnienia 
+100 31 21/03/1970 21/01/1969  2 3000 1
+
+nalezy zaprojektowac obsluge wyjatkow ktore dla dowolnej osoby ktore obsluza nastepujace wyjatki
+
+a) data urodzenia jest pozniejsza niz data zatrudnienia !
+b) data zatrudnienia jest pozniejsza niz data zwolnienia
+c) data urodzenia jest pozniejsza niz data zatrudnienia i data zatrudnienia jest pozniejsza niz 
+data zwolnienia
+
+
+insert into osoby values  (31, 'Karp', 'Janusz',null, to_date('15/03/1971', 'dd/mm/yyyy'), 'M');
+insert into zatrudnienia values  (100,31,to_date('21/03/1970', 'dd/mm/yyyy'),to_date('21/01/1969', 'dd/mm/yyyy'),2,3000,1);
+
+DECLARE
+  z_id osoby.id_os%TYPE:=31;
+  z_data_ur osoby.d_ur%TYPE;
+  z_data_zat zatrudnienia.od%TYPE;
+  z_data_zwol zatrudnienia.od%TYPE;
+  
+  w_UrIZa EXCEPTION;
+  w_ZatIZwol EXCEPTION;
+  w_UrZatZwol EXCEPTION;
+
+
+BEGIN
+
+  SELECT o.d_ur, z.od, z.do
+  INTO z_data_ur, z_data_zat, z_data_zwol
+  FROM osoby o join zatrudnienia z on o.id_os = z.id_os
+  WHERE o.id_os=z_id;
+
+  IF z_data_ur>z_data_zat AND z_data_zat>z_data_zwol THEN 
+    RAISE w_UrZatZwol;
+  END IF;
+  
+  IF z_data_ur>z_data_zat THEN 
+  RAISE w_UrIZa;
+  END IF;
+  
+  IF z_data_zat>z_data_zwol THEN 
+  RAISE w_ZatIZwol;
+  END IF;
+  
+
+EXCEPTION
+  WHEN w_UrIZa THEN 
+  DBMS_OUTPUT.PUT_LINE('Data urodzenia jest pozniejsza niz data zatrudnienia !');
+  WHEN w_ZatIZwol THEN 
+  DBMS_OUTPUT.PUT_LINE('Data zatrudnienia jest pozniejsza niz data zwolnienia!');
+  WHEN w_UrZatZwol THEN 
+  DBMS_OUTPUT.PUT_LINE('Data urodzenia jest pozniejsza niz data zatrudnienia i data zatrudnienia jest pozniejsza niz data zwolnienia!');
+END;
+/
+
+ Do domu 
+ 
+ Wykonac obsluge wyjatku za pomoca wyjatku others przy wykorzystaniu funkcji sqlcode i sqlerrm
+ przy czym obsluga ta powinna polegac na zapisie kodo bledu i tekstu o bledzie do tabeli dziennik_bledow
+ skladajacej sie z dwoch pol kod number i komunikat varchar2(200)
+ blok w ktorym ma byc zrealizowana ta obsluga wyjatkow zawiera kursor niejawny ktory wybiera
+ te osoby dla ktorych aktualny staz pracy wynosi od 1-100 pelnych przepracowanych lat 
