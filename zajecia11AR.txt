@@ -115,3 +115,34 @@ BEGIN
   END IF;
   policz_plec(z_plec_p);
 END;
+
+
+Zadanie 4
+Mamy zaprojektowaæ procedure danych id_os nazwisko||imie1 kierownika oraz liczby dni kierowania wydzialem
+przy czym maja byc to dane osoby, która najdluzej kierowala wydzialem, przy czym nazwa wydzialu jest znana
+
+// poprawic na kursor jawny 
+
+CREATE OR REPLACE PROCEDURE kierowanie_wydzialem(
+p_wydzial wydzialy.nazwa%TYPE)
+AS
+z_id osoby.id_os%TYPE;
+z_dane varchar2(50);
+BEGIN
+select id_os, initcap(nazwisko)||' '||initcap(imie1)
+into z_id, z_dane
+from osoby o
+where id_os IN (select id_os from kierownicy ki
+              join wydzialy w on w.id_w = ki.id_w 
+              where initcap(w.nazwa)=initcap(p_wydzial)
+              and nvl(do,sysdate)-od =(select max(nvl(do,sysdate)-od) from kierownicy k1 
+                                        where k1.id_w=w.id_w));
+                                        
+DBMS_OUTPUT.PUT_LINE(z_id||' '||z_dane);
+
+END;
+/
+
+begin
+KIEROWANIE_WYDZIALEM('Ekonomia');
+end;
