@@ -1,0 +1,117 @@
+Zadanie 1 
+Utworzyæ tabele tabela bledow skladajaca sie z dwoch pol
+pole kod typu numerycznego
+pole komunikat typu tekstowego o max rozmiarze 200
+
+Napisac kod bloku anonimowego, w którym za pomoc¹ kursora niejawnego wyœwietlimy informacje o: 
+a) osobie której identyfikator jest równy 50
+b) wszystkich osobach których identyfikator jest mniejszy ni¿ 50 
+
+Zaprojektowaæ obs³uge powsta³ych wyjatków za pomoca othersa w ten sposób ze do tabeli tabela bledow bedzie wstawiany
+kod i komunikat o bledzie który zosta³ utworzony za pomoca othersa w wyniku uruchomienia 
+
+create table tabela_bledow 
+(
+kod number, 
+komunikat varchar2(200)
+);
+
+
+DECLARE
+  z_id osoby.id_os%TYPE:=50;
+  z_nazwisko osoby.nazwisko%TYPE;
+  z_imie osoby.nazwisko%TYPE;
+  z_kod       NUMBER;
+  z_komunikat VARCHAR2(200);
+BEGIN
+  SELECT imie1, nazwisko 
+  INTO z_imie, z_nazwisko 
+  FROM osoby 
+  WHERE id_os <z_id;
+EXCEPTION
+WHEN OTHERS THEN
+  z_kod      :=SQLCODE;
+  z_komunikat:=SUBSTR(SQLERRM,1,200);
+  INSERT INTO tabela_bledow VALUES (z_kod,z_komunikat);
+END; 
+/
+
+Zadanie 2 
+Napisaæ procedure dodajNowaOsoba ktora bedzie wprowadzala osobe do tabeli osoby przy czym uwzglednic fakt 
+sprawdzenia wprowadzenia osoby istniejacej w bazie
+
+CREATE OR REPLACE PROCEDURE dodaj_nowa_osoba(
+    p_id_os osoby.id_os%TYPE,
+    p_nazwisko osoby.nazwisko%TYPE,
+    p_imie1 osoby.imie1%TYPE,
+    p_imie2 osoby.imie2%TYPE,
+    p_d_ur osoby.d_ur%TYPE,
+    p_plec osoby.plec%TYPE)
+AS
+  z_sprawdz_dane NUMBER;
+BEGIN
+  SELECT COUNT(id_os)
+  INTO z_sprawdz_dane
+  FROM osoby
+  WHERE nazwisko   =p_nazwisko
+  AND imie1        =p_imie1
+  AND imie2        =p_imie2
+  AND d_ur         =p_d_ur
+  AND plec         =p_plec;
+  IF z_sprawdz_dane=0 THEN
+    INSERT INTO osoby VALUES
+      ( p_id_os, p_nazwisko, p_imie1, p_imie2, p_d_ur, p_plec );
+    COMMIT;
+  ELSE
+    Raise_application_error(-20002, 'U¿ytkownik ju¿ istnieje w bazie danych');
+  END IF;
+END;
+
+begin 
+DODAJ_NOWA_OSOBA(31,'Rokicka', 'Anna','Marta', to_date('20.03.1995', 'dd.mm.yyyy'), 'K');
+end;
+
+Utowrzyæ procedure i funkcje dotyczaca obliczen liczby osob o zadanej plci wywolujac je obie ma byc wyswietlone
+liczba kobiet = 18
+liczba mezczyzn = 12
+
+CREATE OR REPLACE PROCEDURE policz_plec(
+    p_plec osoby.plec%TYPE)
+AS
+  z_ile NUMBER;
+BEGIN
+  SELECT COUNT(id_os) INTO z_ile FROM osoby WHERE plec=p_plec;
+  IF p_plec='K' THEN
+    DBMS_OUTPUT.PUT_LINE('Liczba kobiet = '||z_ile);
+  ELSIF p_plec='M' THEN
+    DBMS_OUTPUT.PUT_LINE('Liczba mê¿czyzn = '||z_ile);
+  ELSE
+    RAISE_APPLICATION_ERROR(-20004, 'Zla plec');
+  END IF;
+END;
+/
+
+CREATE OR REPLACE FUNCTION policz_plec_f(
+    p_plec osoby.plec%TYPE)
+  RETURN NUMBER
+AS
+  z_ile NUMBER;
+BEGIN
+  SELECT COUNT(id_os) INTO z_ile FROM osoby WHERE plec=p_plec;
+  RETURN z_ile;
+END;
+/
+
+DECLARE
+  z_plec_f osoby.plec%TYPE :='K';
+  z_plec_p osoby.plec%TYPE :='M';
+BEGIN
+  IF z_plec_f='K' THEN
+    DBMS_OUTPUT.PUT_LINE('Liczba kobiet = '||policz_plec_f(z_plec_f));
+  ELSIF z_plec_f='M' THEN
+    DBMS_OUTPUT.PUT_LINE('Liczba mê¿czyzn = '||policz_plec_f(z_plec_f));
+  ELSE
+    RAISE_APPLICATION_ERROR(-20005, 'Zla plec');
+  END IF;
+  policz_plec(z_plec_p);
+END;
