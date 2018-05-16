@@ -1,0 +1,192 @@
+zad1. Zaprojektowac pakiet o nazwie pakiet_osobowy zawieraj¹cy: 
+- procedurê wprowadzania nowej osoby do tabeli osoby, przy czym powinna ona zawieraæ obs³uge wyjatku, 
+i¿ taka osoba istnieje w tabeli osoby. 
+- procedurê usuwania osoby z tabeli osoby, przy czym powinna ona zawieraæ obs³uge wyjatku, i¿ taka osoba nie istnieje w tabeli osoby
+- wyjatek uzytkownika nie znalezienia danej osoby
+- procedurê wyœwietlaj¹c¹ listê alfabetyczn¹ osób zatrudnionych na danym wydziale,
+ przy czym ma ona byæ drukowana wewn¹trz procedury,
+a  procedura powinna zwracaæ liczbê wszystkich osób zatrudniopnych na danym wydziale
+- funkcjê obliczaj¹c¹ liczbê osób okreœlonej p³ci, aktualnie zatrudnionych na wskazanym wydziale (matematyka)
+
+CREATE OR REPLACE PACKAGE pakiet_osobowy
+AS
+  PROCEDURE DodajOsobe(
+      p_id_os    IN osoby.id_os%TYPE,
+      p_nazwisko IN osoby.nazwisko%TYPE,
+      p_imie1    IN osoby.imie1%TYPE,
+      p_imie2    IN osoby.imie2%TYPE,
+      p_d_ur     IN osoby.d_ur%TYPE,
+      p_plec     IN osoby.plec%TYPE);
+      
+  PROCEDURE UsunOsobe(
+      p_id_os IN osoby.id_os%TYPE);
+      
+  w_OsobaNieZnaleziona EXCEPTION;
+  
+  PROCEDURE ListaOsob(
+      p_wydzial IN wydzialy.nazwa%TYPE,
+      p_liczba_os OUT NUMBER);
+      
+  FUNCTION LiczbaOsobPlec(
+      p_wydzial IN wydzialy.nazwa%TYPE,
+      p_plec IN osoby.plec%TYPE)
+      RETURN NUMBER ;
+      
+END pakiet_osobowy;
+
+
+
+CREATE OR REPLACE PACKAGE BODY pakiet_osobowy
+AS
+  PROCEDURE DodajOsobe(
+      p_id_os    IN osoby.id_os%TYPE,
+      p_nazwisko IN osoby.nazwisko%TYPE,
+      p_imie1    IN osoby.imie1%TYPE,
+      p_imie2    IN osoby.imie2%TYPE,
+      p_d_ur     IN osoby.d_ur%TYPE,
+      p_plec     IN osoby.plec%TYPE) AS 
+      
+    z_sprawdz_dane NUMBER;
+    BEGIN
+      SELECT COUNT(id_os)
+      INTO z_sprawdz_dane
+      FROM osoby
+      WHERE id_os=p_id_os;
+      
+      IF z_sprawdz_dane=0 THEN
+        INSERT INTO osoby VALUES
+          ( p_id_os, p_nazwisko, p_imie1, p_imie2, p_d_ur, p_plec );
+        COMMIT;
+      ELSE
+        Raise_application_error(-20002, 'U¿ytkownik ju¿ istnieje w bazie danych');
+      END IF;
+    END DodajOsobe;
+          
+      
+  PROCEDURE UsunOsobe(
+      p_id_os IN osoby.id_os%TYPE) AS 
+      
+       z_sprawdz_dane NUMBER;
+    BEGIN
+      SELECT COUNT(id_os)
+      INTO z_sprawdz_dane
+      FROM osoby
+      WHERE id_os=p_id_os;
+      
+      IF z_sprawdz_dane!=0 THEN
+        delete from osoby where id_os=p_id_os;
+        COMMIT;
+      ELSE
+       RAISE w_OsobaNieZnaleziona;
+      END IF;
+      
+    EXCEPTION 
+    WHEN w_OsobaNieZnaleziona THEN DBMS_OUTPUT.PUT_LINE('U¿ytkownik nie istnieje w bazie danych');
+    END UsunOsobe;
+
+  
+  PROCEDURE ListaOsob(
+      p_wydzial IN wydzialy.nazwa%TYPE,
+      p_liczba_os OUT NUMBER) AS 
+      
+      z_licznik number:=0; 
+      
+      Cursor k_lista IS 
+      select initcap(o.imie1) D_imie, initcap(o.nazwisko) D_nazwisko
+      from osoby o
+      join zatrudnienia z on o.id_os=z.id_os
+      join wydzialy w on w.id_w=z.id_w
+      where z.do is null
+      and initcap(w.nazwa) = initcap(p_wydzial)
+      order by 2 asc, 1 asc;
+      
+      BEGIN 
+        for i in k_lista loop
+        z_licznik:=z_licznik+1;
+        dbms_output.put_line(z_licznik||' '||i.D_nazwisko||' '||i.D_imie);
+        end loop;
+        
+        p_liczba_os:=z_licznik;
+        
+      END ListaOsob;
+      
+  FUNCTION LiczbaOsobPlec(
+      p_wydzial IN wydzialy.nazwa%TYPE,
+      p_plec IN osoby.plec%TYPE)
+      RETURN NUMBER AS 
+      z_liczba number; 
+      
+      Cursor k_liczba_os IS 
+      select Count(o.id_os)
+      from osoby o
+      join zatrudnienia z on o.id_os=z.id_os 
+      join wydzialy w on w.id_w=z.id_w
+      where z.do is null
+      and initcap(w.nazwa) = initcap(p_wydzial)
+      and initcap(o.plec) = initcap(p_plec);
+      
+      Begin 
+        open k_liczba_os; 
+        fetch k_liczba_os into z_liczba; 
+        close k_liczba_os;
+        RETURN z_liczba;
+      END LiczbaOsobPlec;
+      
+END pakiet_osobowy;
+
+
+declare 
+z_liczba number;
+begin 
+--PAKIET_OSOBOWY.ListaOsob('Matematyka', z_liczba);
+--DBMS_OUTPUT.put_line('Liczba osob na wydziale: '||z_liczba);
+
+DBMS_OUTPUT.put_line('Liczba kobiet zatrudnionych to: '||PAKIET_OSOBOWY.LiczbaOsobPlec('Matematyka','K'));
+
+--PAKIET_OSOBOWY.DODAJOSOBE(31,'Rokicka','Anna', 'Marta', to_date('20/03/1995', 'dd/mm/yyyy'), 'K');
+--PAKIET_OSOBOWY.USUNOSOBE(31);
+end;
+
+
+Zadanie do domu 
+
+zaprojektowaæ pakiet zatrudnianie osoby zawierajacy 
+procedure prywatna pelnedaneosoby za pomoca ktorej nazwisko osoby jest laczone z imieniem osoby i pisane duzymi literami 
+oraz dwie procedury stanowisko osoby za pomoca ktorych wyswietlana jest wewnatrz procedury nazwa stanowiska i 
+lista osob ktore sa na tym stanowisku aktualnie zatrudnione
+oraz procedura ma zwrocic liczbe osob zatrudnionych na tym stanowisko
+dokonac przeciazenia procedury stanowiskoOsoby w ten sposob ze raz parametrem wejsciowym jest id_stanowiskoa a drugi nazwa stanowiska 
+
+
+create or replace package zatrudnienie_osoby AS
+PROCEDURE pelne_dane_osoby (p_id_os osoby.id_os%TYPE);
+
+PROCEDURE stanowisko_osoby(p_id_stanowiska IN stanowiska.id_s%TYPE,
+p_liczba OUT number);
+
+PROCEDURE stanowisko_osoby(p_nazwa stanowiska.nazwa%TYPE,
+p_liczba OUT number);
+
+end zatrudnienie_osoby;
+
+create or replace package body zatrudnienie_osoby AS
+PROCEDURE pelne_dane_osoby (p_id_os osoby.id_os%TYPE) AS
+z_imie osoby.imie1%TYPE;
+z_nazwisko osoby.nazwisko%TYPE;
+
+begin 
+select initcap(imie1), nazwisko 
+into z_imie, z_nazwisko
+from osoby 
+where id_os=p_id_os;
+dbms_output.put_line();
+end pelne_dane_osoby;
+
+PROCEDURE stanowisko_osoby(p_id_stanowiska IN stanowiska.id_s%TYPE,
+p_liczba OUT number);
+
+PROCEDURE stanowisko_osoby(p_nazwa stanowiska.nazwa%TYPE,
+p_liczba OUT number);
+
+end zatrudnienie_osoby;
+
