@@ -188,3 +188,12 @@ FOR EACH ROW
 BEGIN
 PakietDwiePrace.z_osoba:=:new.id_os;
 END tr_DwiePraceB;
+
+
+
+
+trigger 
+podprogram 
+bledy z konstrukcja
+co po uruchomieniu jako wynik
+3-4 napisac 
